@@ -17,6 +17,61 @@ from synchronization.time_normalizer import TimeNormalizer
 from matching.monitoring_support import MonitoringSupportMatcher
 
 MONITORING_PATH = "1 الی 23 بهمن مونیتورینگ.xlsx"
+OUTPUT_PATH = "matched_report.xlsx"
+
+def compute_quality_metrics(monitoring_df, support_df, matches_df):
+    total_monitoring = len(monitoring_df)
+    total_support = len(support_df)
+    total_matches = len(matches_df)
+    match_rate = total_matches / total_monitoring if total_monitoring else 0
+
+    confidence_breakdown = (
+        matches_df["confidence"]
+        .fillna("unknown")
+        .value_counts(normalize=True)
+        .rename("ratio")
+        .reset_index()
+        .rename(columns={"index": "confidence"})
+    )
+
+    delta_series = matches_df["delta_minutes"].dropna()
+    if delta_series.empty:
+        delta_stats = pd.DataFrame(columns=["metric", "value"])
+    else:
+        delta_stats = pd.DataFrame({
+            "metric": [
+                "mean", "median", "std", "min", "max",
+                "p10", "p25", "p50", "p75", "p90", "p95"
+            ],
+            "value": [
+                delta_series.mean(),
+                delta_series.median(),
+                delta_series.std(),
+                delta_series.min(),
+                delta_series.max(),
+                delta_series.quantile(0.10),
+                delta_series.quantile(0.25),
+                delta_series.quantile(0.50),
+                delta_series.quantile(0.75),
+                delta_series.quantile(0.90),
+                delta_series.quantile(0.95)
+            ]
+        })
+
+    summary = pd.DataFrame({
+        "metric": ["total_monitoring", "total_support", "total_matches", "match_rate"],
+        "value": [total_monitoring, total_support, total_matches, match_rate]
+    })
+
+    return summary, confidence_breakdown, delta_stats
+
+
+def export_to_excel(matches_df, summary_df, confidence_df, delta_stats_df, output_path):
+    with pd.ExcelWriter(output_path) as writer:
+        matches_df.to_excel(writer, index=False, sheet_name="matches")
+        summary_df.to_excel(writer, index=False, sheet_name="summary")
+        confidence_df.to_excel(writer, index=False, sheet_name="confidence_breakdown")
+        delta_stats_df.to_excel(writer, index=False, sheet_name="delta_stats")
 
 
 def main():
@@ -27,46 +82,47 @@ def main():
     monitoring_df = MonitoringLoader().load(MONITORING_PATH)
     rate_df = RateLoader().load(MONITORING_PATH)
     support_df = SupportLoader().load(MONITORING_PATH)
-    mapping_df = MappingLoader().load(MONITORING_PATH)
+    mapping_df = MappingLoader().load(MONITORING_PATH)  # اگر در Loader هاردکد شده، باید خودش به exp بخورد
 
     # ----------------------------------------------------
-    # 2. DATA NORMALIZATION (Shared Logic)
+    # 2. DATA NORMALIZATION
     # ----------------------------------------------------
-
-    # 2.1 Normalize Phone Numbers (All DFs)
     print("2. Normalizing Data (Phone and Time)...")
 
     monitoring_df["customer_10"] = monitoring_df["customer_raw"].apply(normalize_phone)
     rate_df["customer_10"] = rate_df["customer_raw"].apply(normalize_phone)
     support_df["customer_10"] = support_df["customer_raw"].apply(normalize_phone)
 
-    # 2.2 Map Agent Names to Extensions (Support DF)
     support_df = map_agent_name_to_ext(support_df, mapping_df)
 
-    # Drop rows where phone number could not be extracted (e.g., ********)
     monitoring_df.dropna(subset=["customer_10"], inplace=True)
     rate_df.dropna(subset=["customer_10"], inplace=True)
     support_df.dropna(subset=["customer_10"], inplace=True)
 
-    # 2.3 Parse Datetime and Calculate Durations (Monitoring & Rate)
     monitoring_df["event_time"] = parse_jalali_datetime(monitoring_df["event_time"])
     support_df["event_time"] = parse_jalali_datetime(support_df["event_time"])
 
-    # Calculate Wait Seconds for Monitoring
+    if "connect_time_raw" in rate_df.columns:
+        # تبدیل تاریخ 1404-11-23 به 1404/11/23 (فقط برای Rate)
+        rate_df["connect_time_raw"] = (
+            rate_df["connect_time_raw"]
+            .astype(str)
+            .str.replace("-", "/", regex=False)
+        )
+
+        rate_df["connect_time_raw"] = parse_jalali_datetime(rate_df["connect_time_raw"])
+
     monitoring_df["wait_seconds"] = pd.to_timedelta(
         monitoring_df["wait_time"]
     ).dt.total_seconds()
 
-    # Calculate Duration Seconds for Rate (assuming rate duration is also H:MM:SS)
     rate_df["duration_seconds"] = pd.to_timedelta(
         rate_df["duration_time"]
     ).dt.total_seconds()
 
     # ----------------------------------------------------
-    # 3. TIME SYNCHRONIZATION (The core logic to enable/disable)
+    # 3. TIME SYNCHRONIZATION
     # ----------------------------------------------------
-
-    # 3.1 Estimate Offset (using Monitoring as base and Support as target)
     print("3. Estimating Time Offset between Support and Monitoring...")
     offset_minutes = SupportOffsetEstimator().estimate(
         monitoring_df.rename(columns={"event_time": "monitoring_time"}),
@@ -75,24 +131,16 @@ def main():
 
     print(f"   -> Estimated Support Offset: {offset_minutes} minutes")
 
-    # 3.2 Apply Synchronization (normalize all times based on offset)
-    normalizer = TimeNormalizer(offset_minutes=offset_minutes)
-
-    # Monitoring is the base, so offset is 0
     monitoring_df = TimeNormalizer(0).apply(monitoring_df, "event_time")
+    support_df = TimeNormalizer(offset_minutes).apply(support_df, "event_time")
 
-    # Apply offset to support time
-    support_df = normalizer.apply(support_df, "event_time")
-
-    # NOTE: Rate offset will be handled later, for now we assume Rate is close to Monitoring
-    rate_df = TimeNormalizer(0).apply(rate_df, "connect_time_raw")  # Rename column later
+    if "connect_time_raw" in rate_df.columns:
+        rate_df = TimeNormalizer(0).apply(rate_df, "connect_time_raw")
 
     # ----------------------------------------------------
-    # 4. MATCHING (The main task)
+    # 4. MATCHING
     # ----------------------------------------------------
     print("4. Running Matching Algorithm (Monitoring <-> Support)...")
-
-    # We only match answered calls in Monitoring (or calls that generated support activity)
     mon_for_matching = monitoring_df[monitoring_df["status"] == "وصل شده"].copy()
 
     matches_df = MonitoringSupportMatcher().match(
@@ -100,23 +148,30 @@ def main():
         support_df=support_df
     )
 
-    # Filter for high confidence matches (e.g., score >= 70)
     final_matches = matches_df[matches_df["confidence"] >= 70]
 
     print("\n--- Results (Top 5 Matches) ---")
     print(final_matches[["customer_10", "monitoring_time", "support_time", "delta_minutes", "confidence"]].head())
 
     # ----------------------------------------------------
-    # 5. ANALYTICS (Test one simple metric)
+    # 5. QUALITY ANALYTICS & EXPORT
     # ----------------------------------------------------
-    print("\n--- Basic Analytics ---")
+    print("\n5. Generating Quality Report and Exporting...")
+    summary_df, confidence_df, delta_stats_df = compute_quality_metrics(
+        monitoring_df=mon_for_matching,
+        support_df=support_df,
+        matches_df=matches_df
+    )
 
-    # Use normalized data for clean calculation
-    avg_wait_time = monitoring_df["wait_seconds"].mean() / 60
-    print(f"Average Wait Time (Uncorrected): {avg_wait_time:.2f} minutes")
+    export_to_excel(
+        matches_df=matches_df,
+        summary_df=summary_df,
+        confidence_df=confidence_df,
+        delta_stats_df=delta_stats_df,
+        output_path=OUTPUT_PATH
+    )
 
-    # You can now proceed to merge final_matches back into monitoring_df
-    # to create the Canonical Event Model for deeper analysis.
+    print(f"Exported report to: {OUTPUT_PATH}")
 
 
 if __name__ == "__main__":

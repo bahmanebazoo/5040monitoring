@@ -15,5 +15,7 @@ def confidence_score(
         score += 20
     elif abs(delta_minutes) < 15:
         score += 10
+    elif abs(delta_minutes) < 40:
+        score += 5
 
     return score
