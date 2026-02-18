@@ -1,8 +1,26 @@
 def confidence_score(
     customer_match: bool,
     agent_match: bool,
-    delta_minutes: float
+    delta_minutes: float,
 ) -> int:
+    """
+    امتیازدهی اعتماد (0-100):
+      - تطبیق مشتری:   40 امتیاز
+      - تطبیق اپراتور:  30 امتیاز
+      - نزدیکی زمانی:   حداکثر 30 امتیاز
+
+    ┌──────────────────────────────────────┬───────┬────────┬───────┐
+    │  ترکیب                              │ امتیاز│ Sup≥75 │ Rate≥95│
+    ├──────────────────────────────────────┼───────┼────────┼───────┤
+    │ مشتری+اپراتور+<3 دقیقه             │  100  │   ✅   │  ✅   │
+    │ مشتری+اپراتور+<5 دقیقه             │   95  │   ✅   │  ✅   │
+    │ مشتری+اپراتور+<10 دقیقه            │   90  │   ❌   │  ✅   │
+    │ مشتری+اپراتور+<15 دقیقه            │   85  │   ❌   │  ✅   │
+    │ مشتری+اپراتور+<30 دقیقه            │   80  │   ❌   │  ✅   │
+    │ مشتری+اپراتور+<45 دقیقه            │   75  │   ❌   │  ✅   │
+    │ مشتری+بدون اپراتور+<3 دقیقه        │   70  │   ❌   │  ❌   │
+    └──────────────────────────────────────┴───────┴────────┴───────┘
+    """
     score = 0
 
     if customer_match:
@@ -11,11 +29,18 @@ def confidence_score(
     if agent_match:
         score += 30
 
-    if abs(delta_minutes) < 5:
+    abs_delta = abs(delta_minutes)
+    if abs_delta < 3:
+        score += 30
+    elif abs_delta < 5:
+        score += 25
+    elif abs_delta < 10:
         score += 20
-    elif abs(delta_minutes) < 15:
+    elif abs_delta < 15:
+        score += 15
+    elif abs_delta < 30:
         score += 10
-    elif abs(delta_minutes) < 40:
+    elif abs_delta < 45:
         score += 5
 
     return score

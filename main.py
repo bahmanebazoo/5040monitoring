@@ -19,6 +19,7 @@ from matching.monitoring_support import MonitoringSupportMatcher
 MONITORING_PATH = "1 الی 23 بهمن مونیتورینگ.xlsx"
 OUTPUT_PATH = "matched_report.xlsx"
 
+
 def compute_quality_metrics(monitoring_df, support_df, matches_df):
     total_monitoring = len(monitoring_df)
     total_support = len(support_df)
@@ -54,13 +55,13 @@ def compute_quality_metrics(monitoring_df, support_df, matches_df):
                 delta_series.quantile(0.50),
                 delta_series.quantile(0.75),
                 delta_series.quantile(0.90),
-                delta_series.quantile(0.95)
-            ]
+                delta_series.quantile(0.95),
+            ],
         })
 
     summary = pd.DataFrame({
         "metric": ["total_monitoring", "total_support", "total_matches", "match_rate"],
-        "value": [total_monitoring, total_support, total_matches, match_rate]
+        "value": [total_monitoring, total_support, total_matches, match_rate],
     })
 
     return summary, confidence_breakdown, delta_stats
@@ -75,18 +76,18 @@ def export_to_excel(matches_df, summary_df, confidence_df, delta_stats_df, outpu
 
 
 def main():
-    # ----------------------------------------------------
+    # ──────────────────────────────────────────────────────
     # 1. LOAD DATA
-    # ----------------------------------------------------
+    # ──────────────────────────────────────────────────────
     print("1. Loading Data...")
     monitoring_df = MonitoringLoader().load(MONITORING_PATH)
     rate_df = RateLoader().load(MONITORING_PATH)
     support_df = SupportLoader().load(MONITORING_PATH)
-    mapping_df = MappingLoader().load(MONITORING_PATH)  # اگر در Loader هاردکد شده، باید خودش به exp بخورد
+    mapping_df = MappingLoader().load(MONITORING_PATH)
 
-    # ----------------------------------------------------
+    # ──────────────────────────────────────────────────────
     # 2. DATA NORMALIZATION
-    # ----------------------------------------------------
+    # ──────────────────────────────────────────────────────
     print("2. Normalizing Data (Phone and Time)...")
 
     monitoring_df["customer_10"] = monitoring_df["customer_raw"].apply(normalize_phone)
@@ -103,13 +104,11 @@ def main():
     support_df["event_time"] = parse_jalali_datetime(support_df["event_time"])
 
     if "connect_time_raw" in rate_df.columns:
-        # تبدیل تاریخ 1404-11-23 به 1404/11/23 (فقط برای Rate)
         rate_df["connect_time_raw"] = (
             rate_df["connect_time_raw"]
             .astype(str)
             .str.replace("-", "/", regex=False)
         )
-
         rate_df["connect_time_raw"] = parse_jalali_datetime(rate_df["connect_time_raw"])
 
     monitoring_df["wait_seconds"] = pd.to_timedelta(
@@ -120,15 +119,14 @@ def main():
         rate_df["duration_time"]
     ).dt.total_seconds()
 
-    # ----------------------------------------------------
+    # ──────────────────────────────────────────────────────
     # 3. TIME SYNCHRONIZATION
-    # ----------------------------------------------------
+    # ──────────────────────────────────────────────────────
     print("3. Estimating Time Offset between Support and Monitoring...")
     offset_minutes = SupportOffsetEstimator().estimate(
         monitoring_df.rename(columns={"event_time": "monitoring_time"}),
-        support_df.rename(columns={"event_time": "support_time"})
+        support_df.rename(columns={"event_time": "support_time"}),
     )
-
     print(f"   -> Estimated Support Offset: {offset_minutes} minutes")
 
     monitoring_df = TimeNormalizer(0).apply(monitoring_df, "event_time")
@@ -136,42 +134,106 @@ def main():
 
     if "connect_time_raw" in rate_df.columns:
         rate_df = TimeNormalizer(0).apply(rate_df, "connect_time_raw")
+        # ╔═══════════════════════════════════════════════════╗
+        # ║  ✅ FIX: rename ستون Rate برای سازگاری با Matcher ║
+        # ╚═══════════════════════════════════════════════════╝
+        rate_df.rename(
+            columns={"connect_time_raw_normalized": "event_time_normalized"},
+            inplace=True,
+        )
 
-    # ----------------------------------------------------
-    # 4. MATCHING
-    # ----------------------------------------------------
-    print("4. Running Matching Algorithm (Monitoring <-> Support)...")
+    print(f"   Rate columns: {list(rate_df.columns)}")
+
+    # ──────────────────────────────────────────────────────
+    # 4a. MATCHING — Monitoring ↔ Support
+    # ──────────────────────────────────────────────────────
+    print("\n4a. Running Matching (Monitoring <-> Support)...")
     mon_for_matching = monitoring_df[monitoring_df["status"] == "وصل شده"].copy()
 
-    matches_df = MonitoringSupportMatcher().match(
+    support_matches_df = MonitoringSupportMatcher().match(
         monitoring_df=mon_for_matching,
-        support_df=support_df
+        support_df=support_df,
     )
 
-    final_matches = matches_df[matches_df["confidence"] >= 70]
+    final_support = support_matches_df[support_matches_df["confidence"] >= 70]
+    print(f"   -> Support matches (conf>=70): {len(final_support)}")
+    print(final_support[[
+        "customer_10", "monitoring_time", "support_time",
+        "delta_minutes", "confidence",
+    ]].head())
 
-    print("\n--- Results (Top 5 Matches) ---")
-    print(final_matches[["customer_10", "monitoring_time", "support_time", "delta_minutes", "confidence"]].head())
+    # ──────────────────────────────────────────────────────
+    # 4b. MATCHING — Monitoring ↔ Rate
+    # ──────────────────────────────────────────────────────
+    print("\n4b. Running Matching (Monitoring <-> Rate)...")
+    from matching.monitoring_rate import MonitoringRateMatcher
+    rate_matches_df = MonitoringRateMatcher(threshold=95).match(
+        monitoring_df=mon_for_matching,
+        rate_df=rate_df,
+    )
 
-    # ----------------------------------------------------
+    matched_rates = rate_matches_df[rate_matches_df["match_status"] == "matched"]
+    print(f"   -> Rate matches found: {len(matched_rates)}")
+
+    # ──────────────────────────────────────────────────────
     # 5. QUALITY ANALYTICS & EXPORT
-    # ----------------------------------------------------
+    # ──────────────────────────────────────────────────────
     print("\n5. Generating Quality Report and Exporting...")
     summary_df, confidence_df, delta_stats_df = compute_quality_metrics(
         monitoring_df=mon_for_matching,
         support_df=support_df,
-        matches_df=matches_df
+        matches_df=support_matches_df,
     )
 
     export_to_excel(
-        matches_df=matches_df,
+        matches_df=support_matches_df,
         summary_df=summary_df,
         confidence_df=confidence_df,
         delta_stats_df=delta_stats_df,
-        output_path=OUTPUT_PATH
+        output_path=OUTPUT_PATH,
+    )
+    print(f"   Exported report to: {OUTPUT_PATH}")
+
+    # ----------------------------------------------------
+    # 6. ENRICHED MONITORING EXCEL (داده خام برای نمودار)
+    # ----------------------------------------------------
+    print("\n6. Generating Enriched Monitoring Excel...")
+
+    from sheets import generate_enriched_excel
+
+    # ⚠️ مچینگ Rate — اگر MonitoringRateMatcher دارید
+    try:
+        from matching.monitoring_rate import MonitoringRateMatcher
+
+        print("   Running Rate Matching...")
+
+        # ✅ اصلاح نام ستون Rate
+        if "connect_time_raw_normalized" in rate_df.columns:
+            rate_df.rename(
+                columns={"connect_time_raw_normalized": "event_time_normalized"},
+                inplace=True,
+            )
+
+        rate_matches_df = MonitoringRateMatcher(threshold=95).match(
+            monitoring_df=mon_for_matching,
+            rate_df=rate_df,
+        )
+        print(f"   → Rate matches: {len(rate_matches_df[rate_matches_df['match_status'] == 'matched'])}")
+
+    except (ImportError, Exception) as e:
+        print(f"   ⚠️ Rate matching skipped: {e}")
+        rate_matches_df = pd.DataFrame()
+
+    # تولید اکسل غنی‌شده
+    enriched_path = generate_enriched_excel(
+        monitoring_df=monitoring_df,                # همه ردیف‌ها (وصل + رها)
+        support_matches_df=support_matches_df,              # خروجی مچینگ Support
+        rate_matches_df=rate_matches_df,             # خروجی مچینگ Rate
+        output_path="sheets/enriched_monitoring.xlsx",
     )
 
-    print(f"Exported report to: {OUTPUT_PATH}")
+    print(f"   Enriched Excel saved to: {enriched_path}")
+
 
 
 if __name__ == "__main__":
