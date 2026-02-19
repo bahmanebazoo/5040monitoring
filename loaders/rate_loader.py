@@ -10,11 +10,12 @@ class RateLoader:
             "موبایل": "customer_raw",
             "داخلی کاربر": "agent_ext",
             "تاریخ تماس": "connect_time_raw",
-            "مدت زمان مکالمه": "duration_time"
+            "مدت زمان مکالمه": "duration_time",
+            "امتیاز": "score"
         })
 
-        # اگر ستون "داخلی اپراتور" از نوع عددی است، آن را به رشته تبدیل می‌کنیم تا با Monitoring مچ شود
-        if 'agent_ext' in df.columns:
-            df['agent_ext'] = df['agent_ext'].astype(str).str.strip()
+        # # اگر ستون "داخلی اپراتور" از نوع عددی است، آن را به رشته تبدیل می‌کنیم تا با Monitoring مچ شود
+        # if 'agent_ext' in df.columns:
+        #     df['agent_ext'] = df['agent_ext'].astype(str).str.strip().str.replace(r'\.0$', '', regex=True)
 
         return df

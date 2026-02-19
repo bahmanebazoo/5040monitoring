@@ -9,10 +9,10 @@ class MonitoringRateMatcher:
     زمان اتصال مونیتورینگ = event_time_normalized + wait_seconds
     سپس مقایسه با event_time_normalized در Rate صورت می‌گیرد.
 
-    آستانه پیش‌فرض: 95
+    آستانه پیش‌فرض: 85
     """
 
-    def __init__(self, threshold: int = 95):
+    def __init__(self, threshold: int = 85):
         self.threshold = threshold
 
     def match(
@@ -132,6 +132,7 @@ class MonitoringRateMatcher:
                         "rate_time": best_rate["event_time_normalized"],
                         "rate_agent_ext": best_rate["agent_ext"],
                         "rate_duration_seconds": best_rate.get("duration_seconds"),
+                        "rate_score": best_rate.get("score"),
                         "delta_minutes": best_delta,
                         "confidence": best_score,
                         "match_status": "matched",
@@ -149,6 +150,7 @@ class MonitoringRateMatcher:
                         "rate_time": pd.NaT,
                         "rate_agent_ext": None,
                         "rate_duration_seconds": None,
+                        "rate_score": None,
                         "delta_minutes": None,
                         "confidence": best_score,
                         "match_status": f"below_threshold (best={best_score})",
