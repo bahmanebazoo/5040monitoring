@@ -6,6 +6,9 @@ class RateLoader:
         # فرض بر این است که نام شیت "Rate" است
         df = pd.read_excel(path, sheet_name="Rate")
 
+        if "تاریخ تماس" in df.columns:
+            df["rate_jalali_date"] = df["تاریخ تماس"].copy()
+
         df = df.rename(columns={
             "موبایل": "customer_raw",
             "داخلی کاربر": "agent_ext",

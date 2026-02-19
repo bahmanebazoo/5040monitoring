@@ -5,6 +5,8 @@ class MonitoringLoader:
     def load(self, path: str) -> pd.DataFrame:
         df = pd.read_excel(path, sheet_name="Monitoring")
 
+        df["monitoring_jalali_date"] = df["تاریخ"].copy()
+
         df = df.rename(columns={
             "مشتری": "customer_raw",
             "وضعیت": "status",

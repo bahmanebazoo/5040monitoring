@@ -136,6 +136,7 @@ class MonitoringRateMatcher:
                         "delta_minutes": best_delta,
                         "confidence": best_score,
                         "match_status": "matched",
+                        "rate_jalali_date": best_rate.get("rate_jalali_date"),
                     }
                 )
             else:
@@ -154,6 +155,7 @@ class MonitoringRateMatcher:
                         "delta_minutes": None,
                         "confidence": best_score,
                         "match_status": f"below_threshold (best={best_score})",
+                        "rate_jalali_date": None,
                     }
                 )
 

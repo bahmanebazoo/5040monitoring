@@ -8,7 +8,6 @@ sheets/enriched/lookups.py
 import pandas as pd
 from .utils import safe_cols
 
-
 # ──────────────────────────────────────────────
 #  Support Lookup
 # ──────────────────────────────────────────────
@@ -16,7 +15,8 @@ from .utils import safe_cols
 _SUP_COLS = [
     "customer_10", "monitoring_time",
     "sup_time", "sup_agent_ext",
-    "sup_delta_minutes", "sup_confidence", "sup_match_status",
+    "sup_delta_minutes", "sup_confidence",
+    "sup_match_status", "sup_jalali_date",
 ]
 
 _SUP_RENAME = {
@@ -26,6 +26,7 @@ _SUP_RENAME = {
     "delta_minutes": "sup_delta_minutes",
     "confidence": "sup_confidence",
     "match_status": "sup_match_status",
+    "support_jalali_date": "sup_jalali_date",
 }
 
 
@@ -58,7 +59,8 @@ _RATE_COLS = [
     "customer_10", "monitoring_time",
     "rate_time", "rate_agent_ext", "rate_duration_seconds",
     "rate_score",
-    "rate_delta_minutes", "rate_confidence", "rate_match_status",
+    "rate_delta_minutes", "rate_confidence",
+    "rate_match_status", "rate_jalali_date",
 ]
 
 _RATE_RENAME = {
@@ -66,6 +68,7 @@ _RATE_RENAME = {
     "delta_minutes": "rate_delta_minutes",
     "confidence": "rate_confidence",
     "match_status": "rate_match_status",
+    "rate_jalali_date": "rate_jalali_date",
 }
 
 

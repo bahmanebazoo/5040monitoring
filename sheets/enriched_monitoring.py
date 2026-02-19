@@ -72,7 +72,7 @@ def generate_enriched_excel(
         "customer_10", "customer_raw",
         "event_time_normalized", "event_time",
         "agent_ext", "status",
-        "wait_time", "wait_seconds",
+        "wait_time", "wait_seconds", "monitoring_jalali_date",
     ]
     base = base[safe_cols(base, base_wanted)].copy()
 
