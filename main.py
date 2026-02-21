@@ -15,6 +15,8 @@ from config.config import (
 
 from pipeline import DataLoader, DataNormalizer, TimeSynchronizer, Matcher
 from sheets import MatchedReportExporter, generate_enriched_excel, generate_analytics_excel
+from analytics_dashboard import generate_analytics_dashboard
+from pathlib import Path
 
 
 def main():
@@ -68,6 +70,19 @@ def main():
             output_path=ANALYTICS_PATH,
         )
         print(f"   ✅ {path}")
+    except Exception as e:
+        print(f"   ❌ Failed: {e}")
+
+    # STEP 8 — Analytics Dashboard with Charts
+    print("\n" + "=" * 60)
+    print("STEP 8 — Analytics Dashboard with Charts")
+    print("=" * 60)
+    try:
+        dashboard_path = generate_analytics_dashboard(
+            enriched_path=ENRICHED_PATH,
+            output_path=Path("analytics_dashboard.xlsx"),
+        )
+        print(f"   ✅ {dashboard_path}")
     except Exception as e:
         print(f"   ❌ Failed: {e}")
 
