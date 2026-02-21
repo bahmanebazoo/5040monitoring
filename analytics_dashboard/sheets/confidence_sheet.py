@@ -21,6 +21,8 @@ class ConfidenceSheetCreator(SheetCreator):
 
     def create(self, wb: Workbook, data: PreparedData) -> None:
         ws = wb.create_sheet(self.sheet_name)
+        ws.sheet_view.rightToLeft = True
+
         df = data.df
 
         if "_confidence" not in df.columns:
@@ -68,7 +70,7 @@ class ConfidenceSheetCreator(SheetCreator):
         )
         pie.dataLabels = DataLabelList()
         pie.dataLabels.showPercent = True
-        ws.add_chart(pie, "E18")
+        ws.add_chart(pie, "E28")
 
         # آمار توصیفی
         if pd.api.types.is_numeric_dtype(cs):

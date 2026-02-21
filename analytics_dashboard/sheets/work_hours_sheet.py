@@ -21,6 +21,8 @@ class WorkHoursSheetCreator(SheetCreator):
 
     def create(self, wb: Workbook, data: PreparedData) -> None:
         ws = wb.create_sheet(self.sheet_name)
+        ws.sheet_view.rightToLeft = True
+
         df = data.df
 
         if "_in_work_hours" not in df.columns:
@@ -194,7 +196,7 @@ class WorkHoursSheetCreator(SheetCreator):
         ncols = len(daily_df.columns)
         ws.add_chart(
             bar,
-            f"{get_column_letter(ncols + 2)}{start_row}"
+            f"{get_column_letter(ncols + 2)}{27}"
         )
 
         return next_row

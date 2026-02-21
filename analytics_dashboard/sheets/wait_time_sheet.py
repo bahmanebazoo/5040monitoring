@@ -21,6 +21,8 @@ class WaitTimeSheetCreator(SheetCreator):
 
     def create(self, wb: Workbook, data: PreparedData) -> None:
         ws = wb.create_sheet(self.sheet_name)
+        ws.sheet_view.rightToLeft = True
+
         df = data.df
         has_w = "_wait_seconds" in df.columns
         has_t = "_talk_seconds" in df.columns
@@ -57,7 +59,7 @@ class WaitTimeSheetCreator(SheetCreator):
                     "0-1m", "1-2m", "2-3m", "3-5m", "5-10m", "10m+",
                 ],
             )
-            self._add_bar(ws, "توزیع مدت مکالمه", ts, tdist_len, "D18")
+            self._add_bar(ws, "توزیع مدت مکالمه", ts, tdist_len, "D29")
 
         self.style.auto_fit(ws)
 

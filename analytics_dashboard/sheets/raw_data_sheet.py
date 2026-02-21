@@ -23,6 +23,8 @@ class RawDataSheetCreator(SheetCreator):
 
     def create(self, wb: Workbook, data: PreparedData) -> None:
         ws = wb.create_sheet(self.sheet_name)
+        ws.sheet_view.rightToLeft = True
+
         df = data.df
 
         # ستون‌های internal رو حذف کن

@@ -13,6 +13,39 @@ from ..data_preparator import PreparedData
 from .base import SheetCreator
 
 
+def _to_jalali(gregorian_date) -> str:
+    """تبدیل تاریخ میلادی به شمسی (جلالی)."""
+    try:
+        import jdatetime
+
+        if isinstance(gregorian_date, str):
+            from datetime import datetime
+
+            gregorian_date = datetime.strptime(
+                str(gregorian_date)[:10], "%Y-%m-%d"
+            ).date()
+        if hasattr(gregorian_date, "date"):
+            gregorian_date = gregorian_date.date()
+        jd = jdatetime.date.fromgregorian(date=gregorian_date)
+        return jd.strftime("%Y/%m/%d")
+    except ImportError:
+        try:
+            from khayyam import JalaliDate
+
+            if isinstance(gregorian_date, str):
+                from datetime import datetime
+
+                gregorian_date = datetime.strptime(
+                    str(gregorian_date)[:10], "%Y-%m-%d"
+                ).date()
+            if hasattr(gregorian_date, "date"):
+                gregorian_date = gregorian_date.date()
+            jd = JalaliDate.from_date(gregorian_date)
+            return str(jd)
+        except ImportError:
+            return str(gregorian_date)
+
+
 class HourlySheetCreator(SheetCreator):
 
     @property
@@ -21,6 +54,8 @@ class HourlySheetCreator(SheetCreator):
 
     def create(self, wb: Workbook, data: PreparedData) -> None:
         ws = wb.create_sheet(self.sheet_name)
+        ws.sheet_view.rightToLeft = True
+
         df = data.df
 
         if "_hour" not in df.columns:
@@ -41,7 +76,7 @@ class HourlySheetCreator(SheetCreator):
                 .round(1)
                 .reset_index()
             )
-            w.columns = ["ثانیه", "میانگین_انتظار"]
+            w.columns = ["ساعت", "میانگین_انتظار"]
             hourly = hourly.merge(w, on="ساعت", how="left")
 
         if "_talk_seconds" in df.columns:
@@ -74,7 +109,7 @@ class HourlySheetCreator(SheetCreator):
             line.series[0].graphicalProperties.line.width = 25000
         ws.add_chart(line, f"{get_column_letter(ncols + 2)}1")
 
-        # ── Area: انتظار ──
+        # ── Area: انتظار (13 سطر پایین‌تر: از 18 به 31) ──
         if "میانگین_انتظار" in hourly.columns:
             wci = list(hourly.columns).index("میانگین_انتظار") + 1
             area = AreaChart()
@@ -91,7 +126,7 @@ class HourlySheetCreator(SheetCreator):
             area.set_categories(
                 Reference(ws, min_col=1, min_row=2, max_row=nrows + 1)
             )
-            ws.add_chart(area, f"{get_column_letter(ncols + 2)}18")
+            ws.add_chart(area, f"{get_column_letter(ncols + 2)}31")
 
         # ── Bar: روزانه ──
         if "_date" in df.columns:
@@ -104,13 +139,24 @@ class HourlySheetCreator(SheetCreator):
         daily = df.groupby("_date").size().reset_index(name="تعداد")
         daily.columns = ["تاریخ", "تعداد"]
 
+        # ── تبدیل تاریخ میلادی به شمسی ──
+        daily["تاریخ"] = daily["تاریخ"].apply(_to_jalali)
+
+        # ── هدر جدول دوم ──
         ws.cell(row=dr, column=1, value="تاریخ")
         ws.cell(row=dr, column=2, value="تعداد")
         self.style.apply_header(ws, row=dr, max_col=2)
 
+        # ── داده‌های جدول دوم ──
         for i, (_, rd) in enumerate(daily.iterrows(), dr + 1):
             ws.cell(row=i, column=1, value=rd["تاریخ"])
             ws.cell(row=i, column=2, value=int(rd["تعداد"]))
+
+        # ── اعمال border + font + alignment روی ردیف‌های داده جدول دوم ──
+        data_end_row = dr + len(daily)
+        self.style.style_data(
+            ws, start_row=dr + 1, end_row=data_end_row, max_col=2
+        )
 
         bar = BarChart()
         bar.title = "تماس‌ها به تفکیک روز"
@@ -127,4 +173,4 @@ class HourlySheetCreator(SheetCreator):
                 ws, min_col=1, min_row=dr + 1, max_row=dr + len(daily)
             )
         )
-        ws.add_chart(bar, f"{get_column_letter(ncols + 2)}35")
+        ws.add_chart(bar, f"{get_column_letter(ncols + 2)}60")

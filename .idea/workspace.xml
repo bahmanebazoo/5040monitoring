@@ -5,26 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="e397c369-a1fb-4fdb-aba9-3aeccfb3a350" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/column_resolver.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/dashboard_generator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/data_preparator.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/__init__.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/agent_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/base.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/confidence_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/delta_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/hourly_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/kpi_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/matching_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/raw_data_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/sla_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/status_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/wait_time_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/work_hours_sheet.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/analytics_dashboard/style_manager.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/agent_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/agent_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/confidence_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/confidence_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/delta_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/delta_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/hourly_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/hourly_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/matching_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/matching_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/sla_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/sla_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/status_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/status_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/wait_time_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/wait_time_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/work_hours_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/work_hours_sheet.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,6 +55,7 @@
   "keyToString": {
     "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "Python.hourly_sheet.executor": "Run",
     "Python.kpi_sheet.executor": "Run",
     "Python.main.executor": "Run",
     "Python.matched_exporter.executor": "Run",
@@ -105,7 +96,8 @@
     <servers />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/Monitoring$main.coverage" NAME="main Coverage Results" MODIFIED="1771677378476" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Monitoring$hourly_sheet.coverage" NAME="hourly_sheet Coverage Results" MODIFIED="1771680231316" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analytics_dashboard/sheets" />
+    <SUITE FILE_PATH="coverage/Monitoring$main.coverage" NAME="main Coverage Results" MODIFIED="1771681094000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Monitoring$sla_sheet.coverage" NAME="sla_sheet Coverage Results" MODIFIED="1771663763834" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analytics_dashboard/sheets" />
     <SUITE FILE_PATH="coverage/Monitoring$kpi_sheet.coverage" NAME="kpi_sheet Coverage Results" MODIFIED="1771676794816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analytics_dashboard/sheets" />
   </component>

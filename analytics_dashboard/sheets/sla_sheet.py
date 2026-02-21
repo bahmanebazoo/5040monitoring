@@ -19,6 +19,8 @@ class SLASheetCreator(SheetCreator):
 
     def create(self, wb: Workbook, data: PreparedData) -> None:
         ws = wb.create_sheet(self.sheet_name)
+        ws.sheet_view.rightToLeft = True
+
         df = data.df
 
         if (
@@ -95,7 +97,7 @@ class SLASheetCreator(SheetCreator):
         )
         if line.series:
             line.series[0].graphicalProperties.line.width = 25000
-        ws.add_chart(line, "F1")
+        ws.add_chart(line, "H1")
 
         # ── SLA ساعتی ──
         if "_hour" in conn_df.columns:
@@ -158,4 +160,4 @@ class SLASheetCreator(SheetCreator):
                 ws, min_col=1, min_row=sr + 1, max_row=sr + 24
             )
         )
-        ws.add_chart(bar, "H18")
+        ws.add_chart(bar, "H26")

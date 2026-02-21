@@ -21,6 +21,8 @@ class StatusSheetCreator(SheetCreator):
 
     def create(self, wb: Workbook, data: PreparedData) -> None:
         ws = wb.create_sheet(self.sheet_name)
+        ws.sheet_view.rightToLeft = True
+
         df = data.df
 
         if "_status" not in df.columns:
@@ -95,4 +97,4 @@ class StatusSheetCreator(SheetCreator):
                 ws, min_col=1, min_row=cr + 1, max_row=cr + len(cross)
             )
         )
-        ws.add_chart(stk, "E18")
+        ws.add_chart(stk, "E28")
