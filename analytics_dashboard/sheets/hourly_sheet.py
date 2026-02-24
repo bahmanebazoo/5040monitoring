@@ -7,6 +7,7 @@ from __future__ import annotations
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.chart import AreaChart, BarChart, LineChart, Reference
+from openpyxl.chart.label import DataLabelList
 from openpyxl.utils import get_column_letter
 
 from ..data_preparator import PreparedData
@@ -44,6 +45,23 @@ def _to_jalali(gregorian_date) -> str:
             return str(jd)
         except ImportError:
             return str(gregorian_date)
+
+
+def _configure_axis(chart, y_title: str, x_title: str = "", y_num_fmt: str = "#,##0"):
+    """تنظیمات مشترک محورهای Y و X برای همه نمودارها."""
+
+    # ── محور Y ──
+    chart.y_axis.title = y_title
+    chart.y_axis.delete = False            # محور Y حتماً نمایش داده شود
+    chart.y_axis.numFmt = y_num_fmt        # فرمت عددی مقادیر محور
+    chart.y_axis.tickLblPos = "low"        # لیبل‌ها در پایین‌ترین جای محور
+    chart.y_axis.majorGridlines = None     # خطوط شبکه اصلی (None = پیش‌فرض)
+
+    # ── محور X ──
+    if x_title:
+        chart.x_axis.title = x_title
+    chart.x_axis.delete = False            # محور X حتماً نمایش داده شود
+    chart.x_axis.tickLblPos = "low"
 
 
 class HourlySheetCreator(SheetCreator):
@@ -94,41 +112,50 @@ class HourlySheetCreator(SheetCreator):
         nrows = len(hourly)
         ncols = len(hourly.columns)
 
-        # ── Line: تعداد تماس ──
+        # ═══════════════════════════════════════════
+        # ── نمودار ۱: Line — تعداد تماس بر حسب ساعت ──
+        # ═══════════════════════════════════════════
         line = LineChart()
         line.title = "روند تعداد تماس بر حسب ساعت"
         line.style = 10
-        line.y_axis.title = "تعداد"
-        line.x_axis.title = "ساعت"
         line.width, line.height = 28, 15
+
+        # ✅ تنظیم محورها با مقادیر مشخص
+        _configure_axis(line, y_title="تعداد", x_title="ساعت", y_num_fmt="#,##0")
+
         cats = Reference(ws, min_col=1, min_row=2, max_row=nrows + 1)
         d_ref = Reference(ws, min_col=2, min_row=1, max_row=nrows + 1)
         line.add_data(d_ref, titles_from_data=True)
         line.set_categories(cats)
-        if line.series:
-            line.series[0].graphicalProperties.line.width = 25000
+
         ws.add_chart(line, f"{get_column_letter(ncols + 2)}1")
 
-        # ── Area: انتظار (13 سطر پایین‌تر: از 18 به 31) ──
+        # ═══════════════════════════════════════════
+        # ── نمودار ۲: Area — میانگین زمان انتظار ──
+        # ═══════════════════════════════════════════
         if "میانگین_انتظار" in hourly.columns:
             wci = list(hourly.columns).index("میانگین_انتظار") + 1
             area = AreaChart()
             area.title = "میانگین زمان انتظار بر حسب ساعت"
             area.style = 10
-            area.y_axis.title = "ثانیه"
             area.width, area.height = 28, 15
+
+            # ✅ تنظیم محورها — فرمت اعشاری برای ثانیه
+            _configure_axis(area, y_title="ثانیه", x_title="ساعت", y_num_fmt="#,##0.0")
+
             area.add_data(
-                Reference(
-                    ws, min_col=wci, min_row=1, max_row=nrows + 1
-                ),
+                Reference(ws, min_col=wci, min_row=1, max_row=nrows + 1),
                 titles_from_data=True,
             )
             area.set_categories(
                 Reference(ws, min_col=1, min_row=2, max_row=nrows + 1)
             )
+
             ws.add_chart(area, f"{get_column_letter(ncols + 2)}31")
 
-        # ── Bar: روزانه ──
+        # ═══════════════════════════════════════════
+        # ── نمودار ۳: Bar — تماس به تفکیک روز ──
+        # ═══════════════════════════════════════════
         if "_date" in df.columns:
             self._add_daily_chart(ws, df, end_row, ncols)
 
@@ -158,19 +185,27 @@ class HourlySheetCreator(SheetCreator):
             ws, start_row=dr + 1, end_row=data_end_row, max_col=2
         )
 
+        # ── نمودار ستونی ──
         bar = BarChart()
         bar.title = "تماس‌ها به تفکیک روز"
         bar.style = 10
         bar.width, bar.height = 28, 15
+
+        # ✅ تنظیم محورها با مقادیر مشخص
+        _configure_axis(bar, y_title="تعداد تماس", x_title="تاریخ", y_num_fmt="#,##0")
+
         bar.add_data(
-            Reference(
-                ws, min_col=2, min_row=dr, max_row=dr + len(daily)
-            ),
+            Reference(ws, min_col=2, min_row=dr, max_row=dr + len(daily)),
             titles_from_data=True,
         )
         bar.set_categories(
-            Reference(
-                ws, min_col=1, min_row=dr + 1, max_row=dr + len(daily)
-            )
+            Reference(ws, min_col=1, min_row=dr + 1, max_row=dr + len(daily)),
         )
+
+        # ✅ نمایش مقدار روی هر ستون
+        if bar.series:
+            bar.series[0].dLbls = DataLabelList()
+            bar.series[0].dLbls.showVal = True
+            bar.series[0].dLbls.numFmt = "#,##0"
+
         ws.add_chart(bar, f"{get_column_letter(ncols + 2)}60")

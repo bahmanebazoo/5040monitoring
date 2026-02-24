@@ -72,7 +72,8 @@ class DataPreparator:
         self._add_agent_col(df, resolver)
         self._add_status_col(df, resolver)
         self._add_numeric_col(df, resolver, "confidence", "_confidence")
-        self._add_numeric_col(df, resolver, "delta", "_delta_minutes")
+        self._add_numeric_col(df, resolver, "sup_delta_minutes", "_delta_support_minutes")
+        self._add_numeric_col(df, resolver, "rate_delta_minutes", "_delta_rate_minutes")
         self._add_numeric_col(df, resolver, "wait", "_wait_seconds")
         self._add_numeric_col(df, resolver, "talk", "_talk_seconds")
 

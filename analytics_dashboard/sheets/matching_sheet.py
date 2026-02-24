@@ -7,6 +7,7 @@ from __future__ import annotations
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.chart import DoughnutChart, Reference
+from openpyxl.chart.label import DataLabelList
 
 from ..data_preparator import PreparedData
 from .base import SheetCreator
@@ -25,7 +26,9 @@ class MatchingSheetCreator(SheetCreator):
         df = data.df
         rc = 1
 
-        # ── جدول وضعیت هر نوع مچ ──
+        # ═══════════════════════════════════════
+        # ① جدول وضعیت هر نوع مچ
+        # ═══════════════════════════════════════
         ws.cell(row=rc, column=1, value="نوع")
         ws.cell(row=rc, column=2, value="وضعیت")
         ws.cell(row=rc, column=3, value="تعداد")
@@ -33,9 +36,11 @@ class MatchingSheetCreator(SheetCreator):
         self.style.apply_header(ws, row=rc, max_col=4)
         rc += 1
 
+        table1_data_start = rc
+
         for col, label in [
             (data.support_match_col, "پشتیبانی"),
-            (data.rate_match_col, "نرخ‌دهی"),
+            (data.rate_match_col, "پنل"),
         ]:
             if col and col in df.columns:
                 vc = (
@@ -55,35 +60,58 @@ class MatchingSheetCreator(SheetCreator):
                     )
                     rc += 1
 
-        self.style.style_data(ws, start_row=2)
+        # ✅ استایل جدول اول — با end_row و max_col صریح
+        table1_data_end = rc - 1
+        if table1_data_end >= table1_data_start:
+            self.style.style_data(
+                ws,
+                start_row=table1_data_start,
+                end_row=table1_data_end,
+                max_col=4,
+            )
 
-        # ── ترکیبی ──
+        # ═══════════════════════════════════════
+        # ② جدول وضعیت ترکیبی
+        # ═══════════════════════════════════════
         s_mask = self._match_mask(df, data.support_match_col)
         r_mask = self._match_mask(df, data.rate_match_col)
 
         rc += 1
+        combo_header_row = rc
         ws.cell(row=rc, column=1, value="وضعیت ترکیبی")
         ws.cell(row=rc, column=2, value="تعداد")
         self.style.apply_header(ws, row=rc, max_col=2)
-        combo_header = rc
         rc += 1
 
         if s_mask.any() or r_mask.any():
             combos = [
                 ("هر دو مچ", int((s_mask & r_mask).sum())),
                 ("فقط پشتیبانی", int((s_mask & ~r_mask).sum())),
-                ("فقط نرخ‌دهی", int((~s_mask & r_mask).sum())),
+                ("فقط پنل", int((~s_mask & r_mask).sum())),
                 ("هیچکدام", int((~s_mask & ~r_mask).sum())),
             ]
         else:
             combos = [("داده کافی نیست", 0)]
 
-        combo_start = rc
+        combo_data_start = rc
         for lb, vl in combos:
             ws.cell(row=rc, column=1, value=lb)
             ws.cell(row=rc, column=2, value=vl)
             rc += 1
 
+        # ✅ استایل جدول ترکیبی — border + font + alignment
+        combo_data_end = rc - 1
+        if combo_data_end >= combo_data_start:
+            self.style.style_data(
+                ws,
+                start_row=combo_data_start,
+                end_row=combo_data_end,
+                max_col=2,
+            )
+
+        # ═══════════════════════════════════════
+        # ③ Doughnut Chart
+        # ═══════════════════════════════════════
         if len(combos) > 1:
             dnt = DoughnutChart()
             dnt.title = "توزیع ترکیبی مچینگ"
@@ -93,8 +121,8 @@ class MatchingSheetCreator(SheetCreator):
                 Reference(
                     ws,
                     min_col=2,
-                    min_row=combo_header,
-                    max_row=combo_start + len(combos) - 1,
+                    min_row=combo_header_row,
+                    max_row=combo_data_start + len(combos) - 1,
                 ),
                 titles_from_data=True,
             )
@@ -102,10 +130,18 @@ class MatchingSheetCreator(SheetCreator):
                 Reference(
                     ws,
                     min_col=1,
-                    min_row=combo_start,
-                    max_row=combo_start + len(combos) - 1,
+                    min_row=combo_data_start,
+                    max_row=combo_data_start + len(combos) - 1,
                 )
             )
+
+            # ✅ نمایش مقدار و درصد روی نمودار
+            if dnt.series:
+                dnt.series[0].dLbls = DataLabelList()
+                dnt.series[0].dLbls.showVal = True
+                dnt.series[0].dLbls.showPercent = True
+                dnt.series[0].dLbls.numFmt = "#,##0"
+
             ws.add_chart(dnt, "F1")
 
         self.style.auto_fit(ws)

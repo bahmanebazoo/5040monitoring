@@ -6,11 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="e397c369-a1fb-4fdb-aba9-3aeccfb3a350" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/column_resolver.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/column_resolver.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/data_preparator.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/data_preparator.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/agent_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/agent_sheet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/confidence_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/confidence_sheet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/delta_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/delta_sheet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/hourly_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/hourly_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/kpi_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/kpi_sheet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/matching_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/matching_sheet.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/raw_data_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/raw_data_sheet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/sla_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/sla_sheet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/status_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/status_sheet.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/analytics_dashboard/sheets/wait_time_sheet.py" beforeDir="false" afterPath="$PROJECT_DIR$/analytics_dashboard/sheets/wait_time_sheet.py" afterDir="false" />
@@ -51,28 +56,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.hourly_sheet.executor": "Run",
-    "Python.kpi_sheet.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.matched_exporter.executor": "Run",
-    "Python.monitoring_rate.executor": "Run",
-    "Python.monitoring_support.executor": "Run",
-    "Python.rate_loader.executor": "Run",
-    "Python.sla_sheet.executor": "Run",
-    "Python.support_loader.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "version-1",
-    "last_opened_file_path": "C:/Users/admin/PycharmProjects/Monitoring",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "settings.editor.selected.configurable": "preferences.lookFeel"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.hourly_sheet.executor&quot;: &quot;Run&quot;,
+    &quot;Python.kpi_sheet.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.matched_exporter.executor&quot;: &quot;Run&quot;,
+    &quot;Python.monitoring_rate.executor&quot;: &quot;Run&quot;,
+    &quot;Python.monitoring_support.executor&quot;: &quot;Run&quot;,
+    &quot;Python.rate_loader.executor&quot;: &quot;Run&quot;,
+    &quot;Python.sla_sheet.executor&quot;: &quot;Run&quot;,
+    &quot;Python.support_loader.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;ai.playground.ignore.import.keys.banner.in.settings&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;version-1&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/admin/PycharmProjects/Monitoring&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="C:\Users\admin\PycharmProjects\Monitoring" />
@@ -81,7 +93,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-python-sdk-0978a7220b69-9867c7d4c0a4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.28294.336" />
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-PY-253.30387.173" />
+        <option value="bundled-python-sdk-4762d8aabb82-6d6dccd035ac-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-253.30387.173" />
       </set>
     </attachedChunks>
   </component>
@@ -92,13 +105,18 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1771327288801</updated>
+      <workItem from="1771738133273" duration="12911000" />
+      <workItem from="1771768565453" duration="467000" />
     </task>
     <servers />
   </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/Monitoring$hourly_sheet.coverage" NAME="hourly_sheet Coverage Results" MODIFIED="1771680231316" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analytics_dashboard/sheets" />
-    <SUITE FILE_PATH="coverage/Monitoring$main.coverage" NAME="main Coverage Results" MODIFIED="1771681094000" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Monitoring$main.coverage" NAME="main Coverage Results" MODIFIED="1771751384222" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/Monitoring$sla_sheet.coverage" NAME="sla_sheet Coverage Results" MODIFIED="1771663763834" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analytics_dashboard/sheets" />
-    <SUITE FILE_PATH="coverage/Monitoring$kpi_sheet.coverage" NAME="kpi_sheet Coverage Results" MODIFIED="1771676794816" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analytics_dashboard/sheets" />
+    <SUITE FILE_PATH="coverage/Monitoring$kpi_sheet.coverage" NAME="kpi_sheet Coverage Results" MODIFIED="1771748447883" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/analytics_dashboard/sheets" />
   </component>
 </project>

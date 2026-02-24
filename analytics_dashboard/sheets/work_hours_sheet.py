@@ -7,7 +7,9 @@ from __future__ import annotations
 import pandas as pd
 from openpyxl import Workbook
 from openpyxl.chart import BarChart, PieChart, Reference
+from openpyxl.chart.label import DataLabelList
 from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.merge import MergedCell
 
 from ..data_preparator import PreparedData
 from .base import SheetCreator
@@ -57,6 +59,12 @@ class WorkHoursSheetCreator(SheetCreator):
         pie.set_categories(
             Reference(ws, min_col=1, min_row=2, max_row=3)
         )
+        # ✅ نمایش درصد روی قطعه‌های پای
+        if pie.series:
+            pie.series[0].dLbls = DataLabelList()
+            pie.series[0].dLbls.showPercent = True
+            pie.series[0].dLbls.showVal = True
+            pie.series[0].dLbls.numFmt = "#,##0"
         ws.add_chart(pie, f"{get_column_letter(len(summary.columns) + 2)}1")
 
         # ═══════════════════════════════════════
@@ -111,6 +119,20 @@ class WorkHoursSheetCreator(SheetCreator):
 
         return row
 
+    # ── هدر مرج‌شده برای بخش‌ها ──
+
+    def _write_section_header(self, ws, row: int, text: str, num_cols: int):
+        """
+        ✅ هدر بخش را می‌نویسد و سلول‌ها را به اندازه تعداد ستون جدول مرج می‌کند.
+        """
+        ws.cell(row=row, column=1, value=text)
+        if num_cols > 1:
+            ws.merge_cells(
+                start_row=row, start_column=1,
+                end_row=row, end_column=num_cols,
+            )
+        self.style.apply_header(ws, row=row, max_col=num_cols)
+
     # ── تفکیک روزانه ──
 
     def _add_daily_breakdown(
@@ -159,23 +181,36 @@ class WorkHoursSheetCreator(SheetCreator):
             return start_row
 
         daily_df = pd.DataFrame(rows)
+        ncols = len(daily_df.columns)
 
-        # عنوان بخش
-        ws.cell(
-            row=start_row, column=1,
-            value="📅 تفکیک روزانه — داخل/خارج تایم کاری"
+        # ✅ عنوان بخش — مرج‌شده به اندازه تعداد ستون‌های جدول
+        self._write_section_header(
+            ws, start_row,
+            "📅 تفکیک روزانه — داخل/خارج تایم کاری",
+            ncols,
         )
-        self.style.apply_header(ws, row=start_row, max_col=1)
 
         next_row = self._write_table(ws, daily_df, start_row=start_row + 1)
 
-        # Bar Chart روزانه
+        # ── Bar Chart روزانه ──
         n_days = len(rows)
         bar = BarChart()
         bar.type = "col"
         bar.title = "تعداد تماس روزانه — داخل vs خارج تایم"
         bar.style = 10
         bar.width, bar.height = 28, 14
+
+        # ✅ محور Y: مقادیر عددی مشخص
+        bar.y_axis.title = "تعداد تماس"
+        bar.y_axis.delete = False
+        bar.y_axis.numFmt = "#,##0"
+        bar.y_axis.tickLblPos = "low"
+
+        # ✅ محور X
+        bar.x_axis.title = "روز هفته"
+        bar.x_axis.delete = False
+        bar.x_axis.tickLblPos = "low"
+
         bar.add_data(
             Reference(
                 ws,
@@ -193,10 +228,16 @@ class WorkHoursSheetCreator(SheetCreator):
                 max_row=start_row + 1 + n_days,
             )
         )
-        ncols = len(daily_df.columns)
+
+        # ✅ نمایش مقدار روی هر ستون
+        for s in bar.series:
+            s.dLbls = DataLabelList()
+            s.dLbls.showVal = True
+            s.dLbls.numFmt = "#,##0"
+
         ws.add_chart(
             bar,
-            f"{get_column_letter(ncols + 2)}{27}"
+            f"{get_column_letter(ncols + 2)}{29}"
         )
 
         return next_row
@@ -206,12 +247,6 @@ class WorkHoursSheetCreator(SheetCreator):
     def _add_out_of_hours_detail(
         self, ws, out_wh: pd.DataFrame, start_row: int
     ):
-        ws.cell(
-            row=start_row, column=1,
-            value="🌙 جزئیات تماس‌های خارج تایم کاری (به تفکیک ساعت)"
-        )
-        self.style.apply_header(ws, row=start_row, max_col=1)
-
         hourly = (
             out_wh.groupby("_hour")
             .size()
@@ -219,5 +254,14 @@ class WorkHoursSheetCreator(SheetCreator):
         )
         hourly.rename(columns={"_hour": "ساعت"}, inplace=True)
         hourly.sort_values("ساعت", inplace=True)
+
+        ncols = len(hourly.columns)
+
+        # ✅ عنوان بخش — مرج‌شده به اندازه تعداد ستون‌های جدول
+        self._write_section_header(
+            ws, start_row,
+            "🌙 جزئیات تماس‌های خارج تایم کاری (به تفکیک ساعت)",
+            ncols,
+        )
 
         self._write_table(ws, hourly, start_row=start_row + 1)

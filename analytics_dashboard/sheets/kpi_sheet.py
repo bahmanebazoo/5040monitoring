@@ -90,7 +90,7 @@ class KPISheetCreator(SheetCreator):
         cursor += self.CHART_HEIGHT + self.GAP
 
         # ⑤ نمودار Bar
-        ws.add_chart(self._build_bar(ws, bar_refs), f"A{cursor}")
+        ws.add_chart(self._build_bar(ws, bar_refs), f"A{37}")
 
         # عرض ستون‌ها
         self.style.auto_fit(ws)
@@ -106,7 +106,7 @@ class KPISheetCreator(SheetCreator):
     ) -> int:
         headers = [
             "کل تماس‌ها", "وصل‌شده", "بی‌پاسخ",
-            "مچ پشتیبانی ✅", "مچ نرخ‌دهی ✅",
+            "مچ پشتیبانی ✅", "مچ پنل ✅",
             "میانگین انتظار (ثانیه)", "میانگین مکالمه (ثانیه)",
             "SLA ≤20s", "تعداد اپراتور",
         ]
@@ -114,14 +114,14 @@ class KPISheetCreator(SheetCreator):
             total, conn, total - conn, s_count, r_count,
             f"{avg_wait:.1f}" if not np.isnan(avg_wait) else "N/A",
             f"{avg_talk:.1f}" if not np.isnan(avg_talk) else "N/A",
-            f"{sla_pct:.1f}%", agents,
+            f"{sla_pct:.1f}%", 10, # تعدا اپراتورها
         ]
         descriptions = [
             "همه تماس‌های مانیتورینگ",
             f"{conn / max(total, 1) * 100:.1f}%",
             f"{(total - conn) / max(total, 1) * 100:.1f}%",
-            f"{s_count / max(total, 1) * 100:.1f}%  ← ستون: {data.support_match_col}",
-            f"{r_count / max(total, 1) * 100:.1f}%  ← ستون: {data.rate_match_col}",
+            f"{s_count / max(total, 1) * 100:.1f}% :تماسهایی که داده پشتیبانی دارند ",
+            f"{r_count / max(total, 1) * 100:.1f}% :تماسهایی که داده پنل دارند ",
             "ASA", "AHT",
             f"{sla_count}/{total}", "",
         ]

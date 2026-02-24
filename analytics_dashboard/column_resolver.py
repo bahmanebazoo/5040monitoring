@@ -45,9 +45,15 @@ class ColumnResolver:
             "confidence", "support_confidence", "match_confidence",
             "امتیاز_اطمینان", "امتیاز",
         ],
-        "delta": [
-            "delta_minutes", "support_delta_minutes", "time_delta",
-            "فاصله_زمانی",
+        "delta_support": [
+            "delta_support", "delta_support_minutes",
+            "support_delta", "اختلاف_پشتیبانی",
+            "فاصله_پشتیبانی", "delta_sup",
+        ],
+        "delta_rate": [
+            "delta_rate", "delta_rate_minutes",
+            "rate_delta", "اختلاف_نرخ",
+            "فاصله_پنل", "delta_panel",
         ],
         "wait": [
             "wait_seconds", "wait_time", "زمان_انتظار", "queue_time",
